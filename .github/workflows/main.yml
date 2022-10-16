@@ -1,46 +1,183 @@
+# This is a basic workflow to help you get started with Actions
+
 name: CI
+
+# Controls when the workflow will run
+
 on:
+
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+
   push:
-    branches: [ main ]
+
+    
+
+    paths:
+
+      - 'main.py'
+
   pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 0 1,15 * *'
+
+    
+
+    paths:
+
+      - 'main.py'
+
+  # Allows you to run this workflow manually from the Actions tab
+
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 
 jobs:
+
+  # This workflow contains a single job called "build"
+
   build:
+
+    # The type of runner that the job will run on
+
     runs-on: ubuntu-latest
 
+    # Steps represent a sequence of tasks that will be executed as part of the job
+
     steps:
-      - uses: actions/checkout@v2
 
-      # used to cache dependencies with a timeout
-      - name: Get Date
-        id: get-date
-        run: |
-          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
-        shell: bash
+      - name: Checkout
 
-      - name: Cache Buildozer global directory
-        uses: actions/cache@v2
-        with:
-          path: .buildozer_global
-          key: buildozer-global-${{ hashFiles('buildozer.spec') }} # Replace with your path
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
 
-      - uses: actions/cache@v2
-        with:
-          path: .buildozer
-          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+        uses: actions/checkout@v3
 
-      - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
+      - name: Get current date
+
+        id: date
+
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%h-%m-%s')"
+
+      
+
+      - name: Buildozer action
+
+        uses: ArtemSBulgakov/buildozer-action@v1.1.3
+
         id: buildozer
-        with:
-          command: buildozer android debug
-          buildozer_version: master
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
         with:
-          name: package
-          path: ${{ steps.buildozer.outputs.filename }}
+
+          repository_root: .
+
+          workdir: .
+
+          buildozer_version: stable
+
+      - name: Create Release
+
+        id: create_release
+
+        uses: actions/create-release@v1
+
+        env:
+
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        with:
+
+          tag_name: ${{ steps.date.outputs.date }}
+
+          release_name: Release ${{ steps.date.outputs.date }}
+
+          draft: false
+
+          prerelease: false
+
+      
+
+      - name: Upload Release Asset
+
+        id: upload-release-asset 
+
+        uses: actions/upload-release-asset@v1
+
+        env:
+
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        with:
+
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+
+          asset_path: ${{ steps.buildozer.outputs.filename }}
+
+          asset_name: my-artifact.apk
+
+          asset_content_type: application/apk
+
+          
+
+      - name: Send mail
+
+        uses: dawidd6/action-send-mail@v3
+
+        with:
+
+    # Required mail server address:
+
+          server_address: smtp.189.cn
+
+    # Required mail server port:
+
+          server_port: 465
+
+    # Optional (recommended): mail server username:
+
+          username: 18132128919@189.cn
+
+    # Optional (recommended) mail server password:
+
+          password: Wofd2402
+
+    # Required mail subject:
+
+          subject: Github Actions job result
+
+    # Required recipients' addresses:
+
+          to: btcfun@dingtalk.com
+
+    # Required sender full name (address can be skipped):
+
+          from: 18132128919@189.cn
+
+    # Optional whether this connection use TLS (default is true if server_port is 465)
+
+          secure: true
+
+    # Optional plain body:
+
+          body: Build job of ${{github.repository}} completed successfully!
+
+    # Optional HTML body read from file:
+
+    
+
+    # Optional carbon copy recipients:
+
+ 
+
+    # Optional unsigned/invalid certificates allowance:
+
+          ignore_cert: true
+
+    # Optional converting Markdown to HTML (set content_type to text/html too):
+
+    
+
+    # Optional attachments:
+
+          attachments:  ${{ steps.buildozer.outputs.filename }}
+
+    # Optional priority: 'high', 'normal' (default) or 'low'
+
+          priority: low
