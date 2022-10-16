@@ -52,7 +52,7 @@ version = 0.1
 
 # comma separated e.g. requirements = sqlite3,kivy,https://github.com/kivymd/KivyMD/archive/master.zip
 
-requirements = python3,kivy,sdl2_ttf==2.0.15,pillow,requests,plyer,pyjnius,pycryptodome,urllib3,https://github.com/feiwen2402/KivyMD/archive/refs/tags/font.zip,idna,zmail,vthread,charset_normalizer
+requirements = python3,kivy==2.0.0,pillow,pycryptodome,zmail,vthread
 
 # (str) Custom source folders for requirements
 
