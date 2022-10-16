@@ -1,4 +1,5 @@
 from kivy.config import Config
+
 DEBUG='000apipy'
 SDMAIN=f'/sdcard/{DEBUG}/main.py'
 DEBUGPATH=f'/sdcard/{DEBUG}'
