@@ -1,6 +1,5 @@
 
 from kivy.config import Config
-import vthread
 DEBUG='000apipy'
 SDMAIN=f'/sdcard/{DEBUG}/main.py'
 DEBUGPATH=f'/sdcard/{DEBUG}'
